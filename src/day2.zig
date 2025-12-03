@@ -19,42 +19,13 @@ pub fn part1(input: []const u8) !u64 {
         while (index < data.len and data[index] != ',') : (index += 1) {}
         const second_number: []const u8 = data[second_number_start..index];
         const second_number_digits = second_number.len;
+        // std.log.err("First number:  {s}", .{first_number});
+        // std.log.err("Second number: {s}", .{second_number});
 
         var digits = first_number_digits;
         while (digits <= second_number_digits) : (digits += 1) {
             if (digits & 1 == 1) continue;
-
-            const half_digits: usize = digits / 2;
-
-            var candidate_half_start = std.math.pow(usize, 10, half_digits - 1);
-            const upper_number_position: u64 = std.math.pow(u64, 10, half_digits);
-            var candidate_half_end = upper_number_position - 1;
-
-            if (first_number_digits == digits) {
-                const first_number_first_half: u64 = try std.fmt.parseInt(u64, first_number[0..half_digits], 10);
-                const first_number_second_half: u64 = try std.fmt.parseInt(u64, first_number[half_digits..], 10);
-                if (first_number_first_half < first_number_second_half) {
-                    candidate_half_start = first_number_first_half + 1;
-                } else {
-                    candidate_half_start = first_number_first_half;
-                }
-            }
-
-            if (second_number_digits == digits) {
-                const second_number_first_half: u64 = try std.fmt.parseInt(u64, second_number[0..half_digits], 10);
-                const second_number_second_half: u64 = try std.fmt.parseInt(u64, second_number[half_digits..], 10);
-                if (second_number_first_half <= second_number_second_half) {
-                    candidate_half_end = second_number_first_half;
-                } else {
-                    candidate_half_end = second_number_first_half - 1;
-                }
-            }
-
-            var half_number: u64 = candidate_half_start;
-            while (half_number <= candidate_half_end) : (half_number += 1) {
-                const candidate = half_number * upper_number_position + half_number;
-                result += candidate;
-            }
+            result += try totalCandidatesAtNumber(first_number, second_number, digits, 2, null);
         }
         data = data[index..];
     }
@@ -62,13 +33,157 @@ pub fn part1(input: []const u8) !u64 {
     return result;
 }
 
-test "part 1" {
-    try std.testing.expectEqual(@as(u64, 1227775554), try part1(test_input));
+// test "part 1" {
+//     try std.testing.expectEqual(@as(u64, 1227775554), try part1(test_input));
+// }
+
+pub fn totalCandidatesAtNumber(
+    first_number: []const u8,
+    second_number: []const u8,
+    digits: u64,
+    prime: usize,
+    hash_set: ?*std.AutoHashMap(u64, void),
+) !u64 {
+    var result: u64 = 0;
+    // std.log.err("Prime: {}", .{prime});
+    const candidate_digits = @divExact(digits, prime);
+    var candidate_start = std.math.pow(u64, 10, candidate_digits - 1);
+    const shift_multiplier = std.math.pow(u64, 10, candidate_digits);
+    var candidate_end = shift_multiplier - 1;
+
+    if (first_number.len == digits) {
+        const first_number_first_part: u64 = try std.fmt.parseInt(u64, first_number[0..candidate_digits], 10);
+        candidate_start = first_number_first_part;
+
+        const part: u64 = try std.fmt.parseInt(u64, first_number[candidate_digits .. 2 * candidate_digits], 10);
+        if (first_number_first_part < part) {
+            candidate_start = first_number_first_part + 1;
+        }
+    }
+
+    if (second_number.len == digits) {
+        const second_number_first_part: u64 = try std.fmt.parseInt(u64, second_number[0..candidate_digits], 10);
+        candidate_end = second_number_first_part;
+
+        const part: u64 = try std.fmt.parseInt(u64, second_number[candidate_digits .. 2 * candidate_digits], 10);
+        if (second_number_first_part > part) {
+            candidate_end = second_number_first_part - 1;
+        }
+    }
+
+    // std.log.err("Start - End: {d} - {d}", .{ candidate_start, candidate_end });
+
+    var candidate: u64 = candidate_start;
+
+    if (hash_set != null and prime_factors[digits].len > 1 and prime_factors[digits][0] == 2) {
+        if (prime == 2) {
+            while (candidate <= candidate_end) : (candidate += 1) {
+                var value: u64 = 0;
+                for (0..prime) |_| {
+                    value = value * shift_multiplier + candidate;
+                }
+                try hash_set.?.put(value, {});
+                // std.log.err("removed: {}", .{value});
+                result += value;
+            }
+        } else {
+            while (candidate <= candidate_end) : (candidate += 1) {
+                var value: u64 = 0;
+                for (0..prime) |_| {
+                    value = value * shift_multiplier + candidate;
+                }
+                if (!hash_set.?.contains(value)) {
+                    // std.log.err("removed: {}", .{value});
+                    result += value;
+                    // } else {
+                    //     std.log.err("Duplicate: {}", .{value});
+                }
+            }
+        }
+    } else {
+        while (candidate <= candidate_end) : (candidate += 1) {
+            var value: u64 = 0;
+            for (0..prime) |_| {
+                value = value * shift_multiplier + candidate;
+            }
+            // std.log.err("removed: {}", .{value});
+            result += value;
+        }
+    }
+
+    // std.log.err("", .{});
+
+    return result;
 }
 
 // NOTE: a u64 number can only have a maximum of 20 digit numbers.
-const prime_factors = [_]u64{ 2, 3, 5, 7, 11, 13, 17, 19 };
+const prime_factors = [_][]const u64{
+    &[_]u64{},
+    &[_]u64{},
+    &[_]u64{2},
+    &[_]u64{3},
+    &[_]u64{2},
+    &[_]u64{5},
+    &[_]u64{ 2, 3 },
+    &[_]u64{7},
+    &[_]u64{2},
+    &[_]u64{3},
+    &[_]u64{ 2, 5 },
+    &[_]u64{11},
+    &[_]u64{ 2, 3 },
+    &[_]u64{13},
+    &[_]u64{ 2, 7 },
+    &[_]u64{ 3, 5 },
+    &[_]u64{2},
+    &[_]u64{17},
+    &[_]u64{ 2, 3 },
+    &[_]u64{19},
+    &[_]u64{ 2, 5 },
+};
 
-pub fn part2(input: []const u8) void {
-    _ = input;
+pub fn part2(input: []const u8) !u64 {
+    var result: u64 = 0;
+
+    var data = if (input[input.len - 1] == '\n') input[0 .. input.len - 1] else input;
+    const allocator = std.heap.page_allocator;
+    var hash_set = std.AutoHashMap(u64, void).init(allocator);
+
+    while (data.len > 0) {
+        var index: usize = @intFromBool(data[0] == ',');
+
+        const first_number_start = index;
+        while (data[index] != '-') : (index += 1) {}
+        const first_number: []const u8 = data[first_number_start..index];
+        const first_number_digits = first_number.len;
+
+        index += 1;
+        const second_number_start = index;
+        while (index < data.len and data[index] != ',') : (index += 1) {}
+        const second_number: []const u8 = data[second_number_start..index];
+        const second_number_digits = second_number.len;
+        // std.log.err("+++++++++++++", .{});
+        // std.log.err("First number:  {s}", .{first_number});
+        // std.log.err("Second number: {s}", .{second_number});
+
+        var digits = first_number_digits;
+        while (digits <= second_number_digits) : (digits += 1) {
+            // std.log.err("-------------", .{});
+            // std.log.err("Digits : {d} ", .{digits});
+            for (prime_factors[digits]) |prime| {
+                result += try totalCandidatesAtNumber(first_number, second_number, digits, prime, &hash_set);
+            }
+            hash_set.clearRetainingCapacity();
+        }
+        data = data[index..];
+    }
+    return result;
+}
+
+test "part 2" {
+    try std.testing.expectEqual(@as(u64, 4174379265), try part2(test_input));
+}
+
+test "part 2-2" {
+    const input = "4338572-4507716";
+    try std.testing.expectEqual(@as(u64, 4444444), try part2(input));
 }

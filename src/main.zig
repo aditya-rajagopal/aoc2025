@@ -5,10 +5,20 @@ const day1_data: []const u8 = @embedFile("data/day1.txt");
 const day2_data: []const u8 = @embedFile("data/day2.txt");
 
 pub fn main() !void {
+    var timer = std.time.Timer.start() catch unreachable;
     const result_day1_1 = try day1.part1(day1_data);
-    std.log.info("Day 1 Part 1\n Password is: {d} \n", .{result_day1_1});
+    var end = timer.lap();
+    std.log.info("Day 1 Part 1\n\tPassword is: {d}\n\tTime: {d}ms", .{ result_day1_1, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    timer.reset();
     const result_day1_2 = try day1.part2(day1_data);
-    std.log.info("Day 1 Part 2\n Password is: {d} \n", .{result_day1_2});
+    end = timer.lap();
+    std.log.info("Day 1 Part 2\n\tPassword is: {d}\n\tTime: {d}ms", .{ result_day1_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    timer.reset();
     const result_day2_1 = try day2.part1(day2_data);
-    std.log.info("Day 2 Part 1\n Total removed is: {d} \n", .{result_day2_1});
+    end = timer.lap();
+    std.log.info("Day 2 Part 1\n\tTotal removed is: {d} \n\tTime: {d}ms", .{ result_day2_1, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    timer.reset();
+    const result_day2_2 = try day2.part2(day2_data);
+    end = timer.lap();
+    std.log.info("Day 2 Part 2\n\tTotal removed is: {d} \n\tTime: {d}ms", .{ result_day2_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
 }
