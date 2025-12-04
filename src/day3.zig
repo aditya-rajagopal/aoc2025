@@ -10,8 +10,8 @@ const test_input =
 
 fn calculateJoltage(comptime digits: usize, line: []const u8) u64 {
     var candidate: [digits]u8 = line[0..digits].*;
-    const indicies: @Vector(digits, u32) = std.simd.iota(usize, digits);
-    var candidate_idx: [digits]usize = indicies;
+    const indicies: @Vector(digits, u8) = std.simd.iota(usize, digits);
+    var candidate_idx: [digits]u8 = indicies;
 
     // std.log.err("Line: {s}", .{line});
     // std.log.err("Candidates start: {s}", .{candidate});
@@ -25,8 +25,8 @@ fn calculateJoltage(comptime digits: usize, line: []const u8) u64 {
                 candidate_idx[digit] < index)
             {
                 candidate[digit..].* = line[index .. index + digits - digit][0 .. digits - digit].*;
-                const offsets = indicies + @as(@Vector(digits, u32), @splat(@truncate(index)));
-                const offsets_data: [digits]usize = offsets;
+                const offsets = indicies + @as(@Vector(digits, u8), @splat(@truncate(index)));
+                const offsets_data: [digits]u8 = offsets;
                 candidate_idx[digit..].* = offsets_data[0 .. digits - digit].*;
                 continue :outter;
             }
