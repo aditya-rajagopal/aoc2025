@@ -20,7 +20,7 @@ pub fn part1(input: []const u8) !i64 {
         while (data[length_shift + 1] != '\n') : (length_shift += 1) {}
         // std.log.err("Dial Position: {d}, result: {d}", .{ dial_position, result });
 
-        const shift = try std.fmt.parseInt(i64, data[1 .. length_shift + 1], 10);
+        const shift: i64 = @intCast(std.fmt.parseUnsigned(u64, data[1 .. length_shift + 1], 10) catch unreachable);
         // std.log.err("Shift: {c} {}", .{ data[0], shift });
         switch (data[0]) {
             'L' => dial_position -= shift,
@@ -67,7 +67,7 @@ pub fn part2(input: []const u8) !i64 {
         while (data[length_shift + 1] != '\n') : (length_shift += 1) {}
         // std.log.err("Dial Position: {d}, result: {d}", .{ dial_position, result });
 
-        const shift = try std.fmt.parseInt(i64, data[1 .. length_shift + 1], 10);
+        const shift: i64 = @intCast(std.fmt.parseUnsigned(u64, data[1 .. length_shift + 1], 10) catch unreachable);
         // std.log.err("Shift: {c} {}", .{ data[0], shift });
         switch (data[0]) {
             'L' => dial_position -= shift,

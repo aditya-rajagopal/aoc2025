@@ -1,8 +1,10 @@
 const std = @import("std");
 const day1 = @import("day1.zig");
 const day2 = @import("day2.zig");
+const day3 = @import("day3.zig");
 const day1_data: []const u8 = @embedFile("data/day1.txt");
 const day2_data: []const u8 = @embedFile("data/day2.txt");
+const day3_data: []const u8 = @embedFile("data/day3.txt");
 
 pub fn main() !void {
     var timer = std.time.Timer.start() catch unreachable;
@@ -21,4 +23,12 @@ pub fn main() !void {
     const result_day2_2 = try day2.part2(day2_data);
     end = timer.lap();
     std.log.info("Day 2 Part 2\n\tTotal removed is: {d} \n\tTime: {d}ms", .{ result_day2_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    timer.reset();
+    const result_day3_1 = try day3.part1(day3_data);
+    end = timer.lap();
+    std.log.info("Day 3 Part 1\n\tTotal joltage is: {d} \n\tTime: {d}ms", .{ result_day3_1, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    timer.reset();
+    const result_day3_2 = try day3.part2(day3_data);
+    end = timer.lap();
+    std.log.info("Day 3 Part 2\n\tTotal joltage is: {d} \n\tTime: {d}ms", .{ result_day3_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
 }
