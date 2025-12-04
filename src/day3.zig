@@ -43,6 +43,48 @@ fn calculateJoltage(comptime digits: usize, line: []const u8) u64 {
     return result;
 }
 
+// NOTE: Alternative solution using DP and SIMD from
+// https://topaz.github.io/paste/#XQAAAQCBAgAAAAAAAAA4HUhjF1isREcvF0cBXvhafO9gvbExmRVQWqSYYJ3gU888pTp+O5qFfbUmMyVBmHaGnInC40/lzKpgtZj2CtfpjRRtg1tc5+OEUdFnIyC5wIqi1yfQcIPHcLtEXA952Vy0IF2bEonL9OMDaq9vuMA3ZOnZS4dgzLSLqWtrpXMOGaCRr+ht1g9eI8DabX94LlSuJRr0USZP+ZYslxbYFsLWsy/WamhKZuSZlK7TndgmrOoH/k2d9EznOch4l/J9tj+Hq909Cufh723SmPKz1TqBIN1Y+g/4rNTJNrKZrisyj4bGHRvjw9qPf1eDde7fRnq4YFCISirqU76Ltw1MronEJwqixnoMX3njAkDIw8MK5Qtmoikpe2n5J/v9Tx6zwdKQdkXgnBSy9Q5AUpyWS33tu87EzmkQsINBU7tE782VAZnMd/PkifJU/qWTAqSbLsQeYr5mUWmt/4DxuCA=
+// Modified this to work for any random input.
+pub fn alternate_function(comptime digits: usize, input: []const u8) !u64 {
+    const nearest_power: usize = comptime blk: {
+        var candidate = std.math.ceilPowerOfTwo(usize, digits) catch unreachable;
+        while (digits + 1 > candidate) {
+            candidate = std.math.ceilPowerOfTwo(usize, candidate + 1) catch unreachable;
+        }
+        break :blk candidate;
+    };
+    const right_shift_mask: @Vector(nearest_power, i32) = comptime blk: {
+        var data: [nearest_power]i32 = [_]i32{-1} ++ [_]i32{0} ** digits ++ [_]i32{-1} ** (nearest_power - digits - 1);
+        for (0..digits) |digit| {
+            data[digit + 1] = digit;
+        }
+        break :blk data;
+    };
+    const zero: @Vector(nearest_power, u64) = @splat(0);
+    const ten: @Vector(nearest_power, u64) = @splat(10);
+
+    var result: u64 = 0;
+
+    const data = if (input[input.len - 1] == '\n') input[0 .. input.len - 1] else input;
+    var iter = std.mem.splitScalar(u8, data, '\n');
+
+    while (iter.next()) |bank| {
+        // std.log.err("Line: {s}", .{bank});
+        var dp = zero;
+        for (bank) |battery| {
+            const digit: @Vector(nearest_power, u64) = @splat(battery - '0');
+            // std.log.err("DP:  {any}", .{dp});
+            // std.log.err("DP2: {any}", .{dp * ten + digit});
+            dp = @max(dp, @shuffle(u64, dp * ten + digit, zero, right_shift_mask));
+        }
+        result += dp[digits];
+        // std.log.err("", .{});
+    }
+
+    return result;
+}
+
 pub fn part1(input: []const u8) !u64 {
     var result: u64 = 0;
     const data = if (input[input.len - 1] == '\n') input[0 .. input.len - 1] else input;
@@ -56,6 +98,7 @@ pub fn part1(input: []const u8) !u64 {
 
 test "Part 1" {
     try std.testing.expectEqual(@as(u64, 357), try part1(test_input));
+    try std.testing.expectEqual(@as(u64, 357), try alternate_function(2, test_input));
 }
 
 pub fn part2(input: []const u8) !u64 {
@@ -73,4 +116,5 @@ pub fn part2(input: []const u8) !u64 {
 
 test "Part 2" {
     try std.testing.expectEqual(@as(u64, 3121910778619), try part2(test_input));
+    try std.testing.expectEqual(@as(u64, 3121910778619), try alternate_function(12, test_input));
 }
