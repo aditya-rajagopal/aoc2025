@@ -2,9 +2,11 @@ const std = @import("std");
 const day1 = @import("day1.zig");
 const day2 = @import("day2.zig");
 const day3 = @import("day3.zig");
+const day4 = @import("day4.zig");
 const day1_data: []const u8 = @embedFile("data/day1.txt");
 const day2_data: []const u8 = @embedFile("data/day2.txt");
 const day3_data: []const u8 = @embedFile("data/day3.txt");
+const day4_data: []const u8 = @embedFile("data/day4.txt");
 
 pub fn main() !void {
     var timer = std.time.Timer.start() catch unreachable;
@@ -31,4 +33,12 @@ pub fn main() !void {
     const result_day3_2 = try day3.part2(day3_data);
     end = timer.lap();
     std.log.info("Day 3 Part 2\n\tTotal joltage is: {d} \n\tTime: {d}ms", .{ result_day3_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    timer.reset();
+    const result_day4_1 = day4.part1(day4_data);
+    end = timer.lap();
+    std.log.info("Day 4 Part 1\n\tTotal rolls is: {d} \n\tTime: {d}ms", .{ result_day4_1, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    timer.reset();
+    const result_day4_2 = day4.part2(day4_data);
+    end = timer.lap();
+    std.log.info("Day 4 Part 2\n\tTotal joltage is: {d} \n\tTime: {d}ms", .{ result_day4_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
 }
