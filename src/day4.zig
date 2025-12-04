@@ -115,23 +115,93 @@ pub fn part2(input: []const u8) u64 {
     const grid: []u8 = std.heap.page_allocator.alloc(u8, width * height) catch unreachable;
 
     var new_result: u64 = 1;
-    while (new_result != 0) {
-        @memset(grid, 0);
-        parseGrid(data, grid, width, height);
+    @memset(grid, 0);
+    parseGrid(data, grid, width, height);
 
+    while (new_result != 0) {
+        // debugPrintGrid(data, grid, width, height);
+        // std.log.err("new_result: {d}", .{new_result});
         new_result = 0;
-        for (grid, 0..) |val, i| {
-            const row = @divTrunc(i, width);
-            const col = @mod(i, width);
-            const condition = val < 4 and data[row * (width + 1) + col] == '@';
-            new_result += @intFromBool(condition);
-            if (condition) {
-                data[row * (width + 1) + col] = '.';
+        for (1..height - 1) |row| {
+            for (1..width - 1) |col| {
+                const condition = grid[row * width + col] < 4 and data[row * (width + 1) + col] == '@';
+                if (condition) {
+                    new_result += 1;
+                    data[row * (width + 1) + col] = '.';
+                    grid[width * (row - 1) + col + 1] -= 1;
+                    grid[width * (row - 1) + col - 1] -= 1;
+                    grid[width * (row - 1) + col] -= 1;
+                    grid[width * row + col + 1] -= 1;
+                    grid[width * row + col - 1] -= 1;
+                    grid[width * (row + 1) + col + 1] -= 1;
+                    grid[width * (row + 1) + col - 1] -= 1;
+                    grid[width * (row + 1) + col] -= 1;
+                }
             }
         }
-        // debugPrintGrid(data, grid, width, height);
+
+        for (0..width) |col| {
+            var condition = grid[col] < 4 and data[col] == '@';
+            if (condition) {
+                data[col] = '.';
+                new_result += 1;
+                if (col < width - 1) {
+                    grid[col + 1] -= 1;
+                    grid[width + col + 1] -= 1;
+                }
+                if (col > 0) {
+                    grid[col - 1] -= 1;
+                    grid[width + col - 1] -= 1;
+                }
+                grid[width + col] -= 1;
+            }
+            condition = grid[(height - 1) * width + col] < 4 and data[(height - 1) * (width + 1) + col] == '@';
+            if (condition) {
+                new_result += 1;
+                data[(height - 1) * (width + 1) + col] = '.';
+                if (col < width - 1) {
+                    grid[width * (height - 2) + col + 1] -= 1;
+                    grid[width * (height - 1) + col + 1] -= 1;
+                }
+                if (col > 0) {
+                    grid[width * (height - 2) + col - 1] -= 1;
+                    grid[width * (height - 1) + col - 1] -= 1;
+                }
+                grid[width * (height - 2) + col] -= 1;
+            }
+        }
+
+        for (0..height) |row| {
+            var condition = grid[row * width] < 4 and data[row * (width + 1)] == '@';
+            if (condition) {
+                data[row * (width + 1)] = '.';
+                new_result += 1;
+                if (row < height - 1) {
+                    grid[(row + 1) * width] -= 1;
+                    grid[(row + 1) * width + 1] -= 1;
+                }
+                if (row > 0) {
+                    grid[(row - 1) * width] -= 1;
+                    grid[(row - 1) * width + 1] -= 1;
+                }
+                grid[row * width + 1] -= 1;
+            }
+            condition = grid[row * width + width - 1] < 4 and data[row * (width + 1) + width - 1] == '@';
+            if (condition) {
+                data[row * (width + 1) + width - 1] = '.';
+                new_result += 1;
+                if (row < height - 1) {
+                    grid[(row + 1) * width + width - 1] -= 1;
+                    grid[(row + 1) * width + width - 1 - 1] -= 1;
+                }
+                if (row > 0) {
+                    grid[(row - 1) * width + width - 1] -= 1;
+                    grid[(row - 1) * width + width - 1 - 1] -= 1;
+                }
+                grid[row * width + width - 1 - 1] -= 1;
+            }
+        }
         result += new_result;
-        // std.log.err("new_result: {d}", .{new_result});
     }
 
     return result;
