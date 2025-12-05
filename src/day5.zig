@@ -51,6 +51,7 @@ pub fn part1(input: []const u8) u64 {
     while (lines.next()) |line| {
         const number: i64 = std.fmt.parseUnsigned(i64, line, 10) catch unreachable;
         var index: usize = 0;
+        var in_range_checks: VecBool = @splat(false);
         while (index < lower_bounds.items.len) : (index += vector_length) {
             const lower_vec: VecInt = lower_bounds.items[index .. index + vector_length][0..vector_length].*;
             const upper_vec: VecInt = upper_bounds.items[index .. index + vector_length][0..vector_length].*;
@@ -58,12 +59,13 @@ pub fn part1(input: []const u8) u64 {
 
             const lower_bound_check: VecBool = (candidate - lower_vec) >= zero;
             const upper_bound_check: VecBool = (upper_vec - candidate) >= zero;
-            const in_range_count = @reduce(.Or, lower_bound_check & upper_bound_check);
-
-            if (in_range_count) {
-                result += 1;
-                break;
-            }
+            in_range_checks |= lower_bound_check & upper_bound_check;
+        }
+        // NOTE: You could check every loop if the in_range_check has any trues. But that hurts throughput.
+        // With our input sizes it is actually faster to not exit early and just check all numbers and then do the
+        // reduce op.
+        if (@reduce(.Or, in_range_checks)) {
+            result += 1;
         }
     }
 
@@ -80,7 +82,6 @@ inline fn isOverlap(lower1: u64, upper1: u64, lower2: u64, upper2: u64) bool {
 }
 
 pub fn part2(input: []const u8) u64 {
-    var result: u64 = 0;
     var buffer: [2048]u64 = undefined;
     // const buffer: []u64 = std.heap.page_allocator.alignedAlloc(u64, .fromByteUnits(128), 2048) catch unreachable;
     var lower_bounds = std.ArrayList(u64).initBuffer(buffer[0..1024]);
@@ -150,18 +151,19 @@ pub fn part2(input: []const u8) u64 {
     assert(lower_bounds.items.len == nearest_aligned_boundry);
 
     var index: usize = 0;
+    var result: VecInt = zero;
     while (index < lower_bounds.items.len) : (index += vector_length) {
         const lower_vec: VecInt = lower_bounds.items[index .. index + vector_length][0..vector_length].*;
         const upper_vec: VecInt = upper_bounds.items[index .. index + vector_length][0..vector_length].*;
 
-        result += @reduce(.Add, upper_vec - lower_vec + ones * @intFromBool(upper_vec > zero));
+        result += upper_vec - lower_vec + ones * @intFromBool(upper_vec > zero);
     }
 
     // NOTE: This is about as fast as doing the SIMD version but SIMD is cooler
     // for (lower_bounds.items, upper_bounds.items) |lower, upper| {
     //     result += upper - lower + 1;
     // }
-    return result;
+    return @reduce(.Add, result);
 }
 
 test "part2" {
