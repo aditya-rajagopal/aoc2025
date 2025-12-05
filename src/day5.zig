@@ -18,7 +18,7 @@ const test_input =
 
 pub fn part1(input: []const u8) u64 {
     var result: u64 = 0;
-    const buffer: []i64 = std.heap.page_allocator.alignedAlloc(i64, .fromByteUnits(128), 2048) catch unreachable;
+    var buffer: [2048]i64 = undefined;
     var lower_bounds = std.ArrayList(i64).initBuffer(buffer[0..1024]);
     var upper_bounds = std.ArrayList(i64).initBuffer(buffer[1024..]);
 
@@ -80,7 +80,8 @@ inline fn isOverlap(lower1: u64, upper1: u64, lower2: u64, upper2: u64) bool {
 
 pub fn part2(input: []const u8) u64 {
     var result: u64 = 0;
-    const buffer: []u64 = std.heap.page_allocator.alignedAlloc(u64, .fromByteUnits(128), 2048) catch unreachable;
+    var buffer: [2048]u64 = undefined;
+    // const buffer: []u64 = std.heap.page_allocator.alignedAlloc(u64, .fromByteUnits(128), 2048) catch unreachable;
     var lower_bounds = std.ArrayList(u64).initBuffer(buffer[0..1024]);
     var upper_bounds = std.ArrayList(u64).initBuffer(buffer[1024..]);
 
