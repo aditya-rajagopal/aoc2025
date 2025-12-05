@@ -107,7 +107,7 @@ pub fn part2(input: []const u8) u64 {
             std.heap.page_allocator.dupe(u8, input) catch unreachable;
 
     const width = std.mem.find(u8, data, "\n").?;
-    const height = std.mem.count(u8, data, "\n") + 1;
+    const height = data.len / width;
     if (height == 1) return 0;
 
     // std.log.err("Width: {d}, Height: {d}", .{ width, height });
@@ -118,6 +118,8 @@ pub fn part2(input: []const u8) u64 {
     @memset(grid, 0);
     parseGrid(data, grid, width, height);
 
+    // PERF: We dont need to go through the entire grid more than once. Subsequent runs can just look at the
+    // cells that changed and update only surrounding ones from a queue. Needs to be a BFS
     while (new_result != 0) {
         // debugPrintGrid(data, grid, width, height);
         // std.log.err("new_result: {d}", .{new_result});
