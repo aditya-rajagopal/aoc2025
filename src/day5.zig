@@ -47,6 +47,7 @@ pub fn part1(input: []const u8) u64 {
     upper_bounds.appendNTimesAssumeCapacity(0, nearest_aligned_boundry - num_ranges);
     assert(lower_bounds.items.len == nearest_aligned_boundry);
 
+    // PERF: Maybe it might be better to sort the ranges while parsing and do a binary search here?
     while (lines.next()) |line| {
         const number: i64 = std.fmt.parseUnsigned(i64, line, 10) catch unreachable;
         var index: usize = 0;
