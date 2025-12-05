@@ -61,8 +61,9 @@ pub fn part1(input: []const u8) u64 {
             const upper_bound_check: VecBool = (upper_vec - candidate) >= zero;
             in_range_checks |= lower_bound_check & upper_bound_check;
         }
-        // NOTE: You could check every loop if the in_range_check has any trues. But that hurts throughput.
-        // With our input sizes it is actually faster to not exit early and just check all numbers and then do the
+        // NOTE: You could check every loop if the in_range_check has any trues and exit early from the loop
+        // when we find even 1 range which contains the number. But that hurts throughput.
+        // With our input sizes it is actually faster to not exit early and just check all numbers and then do one
         // reduce op.
         if (@reduce(.Or, in_range_checks)) {
             result += 1;
