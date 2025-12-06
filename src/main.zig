@@ -4,11 +4,13 @@ const day2 = @import("day2.zig");
 const day3 = @import("day3.zig");
 const day4 = @import("day4.zig");
 const day5 = @import("day5.zig");
+const day6 = @import("day6.zig");
 const day1_data: []const u8 = @embedFile("data/day1.txt");
 const day2_data: []const u8 = @embedFile("data/day2.txt");
 const day3_data: []const u8 = @embedFile("data/day3.txt");
 const day4_data: []const u8 = @embedFile("data/day4.txt");
 const day5_data: []const u8 = @embedFile("data/day5.txt");
+const day6_data: []const u8 = @embedFile("data/day6.txt");
 
 pub fn main() !void {
     var timer = std.time.Timer.start() catch unreachable;
@@ -51,4 +53,12 @@ pub fn main() !void {
     const result_day5_2 = day5.part2(day5_data);
     end = timer.lap();
     std.log.info("Day 5 Part 2\n\tTotal ingredients: {d} \n\tTime: {d}ms", .{ result_day5_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    timer.reset();
+    const result_day6_1 = day6.part1(day6_data);
+    end = timer.lap();
+    std.log.info("Day 6 Part 1\n\tTotal: {d} \n\tTime: {d}ms", .{ result_day6_1, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    timer.reset();
+    const result_day6_2 = day6.part2(day6_data);
+    end = timer.lap();
+    std.log.info("Day 6 Part 2\n\tTotal: {d} \n\tTime: {d}ms", .{ result_day6_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
 }
