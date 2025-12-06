@@ -12,7 +12,7 @@ const test_input: []const u8 =
 pub fn part1(input: []const u8) u64 {
     var buffer: [8192 * 2]u16 align(128) = undefined;
     const line_length: usize = std.mem.indexOfScalar(u8, input, '\n') orelse unreachable;
-    const line_count: usize = input.len / line_length;
+    const line_count: usize = input.len / (line_length + 1);
 
     // TODO: Implement something different if line_count > 5
     assert(line_count >= 2);
@@ -127,7 +127,7 @@ test "part1" {
 pub fn part2(input: []const u8) u64 {
     var buffer: [8192 * 2]u16 align(128) = undefined;
     const line_length: usize = std.mem.indexOfScalar(u8, input, '\n') orelse unreachable;
-    const line_count: usize = input.len / line_length;
+    const line_count: usize = input.len / (line_length + 1);
 
     // TODO: Implement something different if line_count > 5
     assert(line_count >= 2);
