@@ -54,11 +54,17 @@ pub fn main() !void {
     end = timer.lap();
     std.log.info("Day 5 Part 2\n\tTotal ingredients: {d} \n\tTime: {d}ms", .{ result_day5_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
     timer.reset();
-    const result_day6_1 = day6.part1(day6_data);
+    var result_day6_1: u64 = 0;
+    for (0..20000) |_| {
+        result_day6_1 = day6.part1(day6_data);
+    }
     end = timer.lap();
-    std.log.info("Day 6 Part 1\n\tTotal: {d} \n\tTime: {d}ms", .{ result_day6_1, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    std.log.info("Day 6 Part 1\n\tTotal: {d} \n\tTime: {d}ms", .{ result_day6_1, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) / 20000.0 });
     timer.reset();
-    const result_day6_2 = day6.part2(day6_data);
+    var result_day6_2: u64 = 0;
+    for (0..20000) |_| {
+        result_day6_2 = day6.part2(day6_data);
+    }
     end = timer.lap();
-    std.log.info("Day 6 Part 2\n\tTotal: {d} \n\tTime: {d}ms", .{ result_day6_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) });
+    std.log.info("Day 6 Part 2\n\tTotal: {d} \n\tTime: {d}ms", .{ result_day6_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) / 20000.0 });
 }

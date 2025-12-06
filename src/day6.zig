@@ -9,8 +9,10 @@ const test_input: []const u8 =
     \\
 ;
 
+const BufferType = u16;
+
 pub fn part1(input: []const u8) u64 {
-    var buffer: [8192 * 2]u16 align(128) = undefined;
+    var buffer: [8192 * 2]BufferType align(128) = undefined;
     const line_length: usize = std.mem.indexOfScalar(u8, input, '\n') orelse unreachable;
     const line_count: usize = input.len / (line_length + 1);
 
@@ -18,11 +20,11 @@ pub fn part1(input: []const u8) u64 {
     assert(line_count >= 2);
     assert(line_count <= 5);
 
-    var numbers_addition: [4]std.ArrayList(u16) = undefined;
-    var numbers_mult: [4]std.ArrayList(u16) = undefined;
+    var numbers_addition: [4]std.ArrayList(BufferType) = undefined;
+    var numbers_mult: [4]std.ArrayList(BufferType) = undefined;
     inline for (&numbers_addition, &numbers_mult, 0..) |*add, *mult, i| {
-        add.* = std.ArrayList(u16).initBuffer(buffer[i * 2048 .. (i + 1) * 2048]);
-        mult.* = std.ArrayList(u16).initBuffer(buffer[8192 + i * 2048 .. 8192 + (i + 1) * 2048]);
+        add.* = std.ArrayList(BufferType).initBuffer(buffer[i * 2048 .. (i + 1) * 2048]);
+        mult.* = std.ArrayList(BufferType).initBuffer(buffer[8192 + i * 2048 .. 8192 + (i + 1) * 2048]);
     }
 
     var lines: [5][]const u8 = undefined;
@@ -36,8 +38,8 @@ pub fn part1(input: []const u8) u64 {
     var next_index: usize = 0;
     // TODO: Should we do the parsing first
     // var bool_buffer: [2048]bool = undefined;
-    // var start_buffer: [2048]u16 = undefined;
-    // var start_indices: std.ArrayList(u16) = std.ArrayList(u16).initBuffer(start_buffer[0..]);
+    // var start_buffer: [2048]BufferType = undefined;
+    // var start_indices: std.ArrayList(BufferType) = std.ArrayList(BufferType).initBuffer(start_buffer[0..]);
     // var is_addition: std.ArrayList(bool) = std.ArrayList(bool).initBuffer(bool_buffer[0..]);
     // while (index < line_length) : (index += 1) {
     //     var next_operator_index: usize = index + 1;
@@ -60,14 +62,14 @@ pub fn part1(input: []const u8) u64 {
                 var start_index: usize = index;
                 while (line[start_index] == ' ') : (start_index += 1) {}
                 const end_index: usize = std.mem.indexOfScalarPos(u8, line, start_index, ' ') orelse line.len;
-                numbers_mult[i].appendAssumeCapacity(std.fmt.parseUnsigned(u16, line[start_index..end_index], 10) catch unreachable);
+                numbers_mult[i].appendAssumeCapacity(std.fmt.parseUnsigned(BufferType, line[start_index..end_index], 10) catch unreachable);
             }
         } else {
             for (lines[0 .. line_count - 1], 0..) |line, i| {
                 var start_index: usize = index;
                 while (line[start_index] == ' ') : (start_index += 1) {}
                 const end_index: usize = std.mem.indexOfScalarPos(u8, line, start_index, ' ') orelse line.len;
-                numbers_addition[i].appendAssumeCapacity(std.fmt.parseUnsigned(u16, line[start_index..end_index], 10) catch unreachable);
+                numbers_addition[i].appendAssumeCapacity(std.fmt.parseUnsigned(BufferType, line[start_index..end_index], 10) catch unreachable);
             }
         }
     }
@@ -125,7 +127,7 @@ test "part1" {
 }
 
 pub fn part2(input: []const u8) u64 {
-    var buffer: [8192 * 2]u16 align(128) = undefined;
+    var buffer: [8192 * 2]BufferType align(128) = undefined;
     const line_length: usize = std.mem.indexOfScalar(u8, input, '\n') orelse unreachable;
     const line_count: usize = input.len / (line_length + 1);
 
@@ -133,11 +135,11 @@ pub fn part2(input: []const u8) u64 {
     assert(line_count >= 2);
     assert(line_count <= 5);
 
-    var numbers_addition: [4]std.ArrayList(u16) = undefined;
-    var numbers_mult: [4]std.ArrayList(u16) = undefined;
+    var numbers_addition: [4]std.ArrayList(BufferType) = undefined;
+    var numbers_mult: [4]std.ArrayList(BufferType) = undefined;
     inline for (&numbers_addition, &numbers_mult, 0..) |*add, *mult, i| {
-        add.* = std.ArrayList(u16).initBuffer(buffer[i * 2048 .. (i + 1) * 2048]);
-        mult.* = std.ArrayList(u16).initBuffer(buffer[8192 + i * 2048 .. 8192 + (i + 1) * 2048]);
+        add.* = std.ArrayList(BufferType).initBuffer(buffer[i * 2048 .. (i + 1) * 2048]);
+        mult.* = std.ArrayList(BufferType).initBuffer(buffer[8192 + i * 2048 .. 8192 + (i + 1) * 2048]);
     }
 
     var lines: [5][]const u8 = undefined;
@@ -150,8 +152,8 @@ pub fn part2(input: []const u8) u64 {
     var index: usize = 0;
     var next_index: usize = 0;
     var bool_buffer: [2048]bool = undefined;
-    var start_buffer: [2048]u16 = undefined;
-    var start_indices: std.ArrayList(u16) = std.ArrayList(u16).initBuffer(start_buffer[0..]);
+    var start_buffer: [2048]BufferType align(128) = undefined;
+    var start_indices: std.ArrayList(BufferType) = std.ArrayList(BufferType).initBuffer(start_buffer[0..]);
     var is_addition: std.ArrayList(bool) = std.ArrayList(bool).initBuffer(bool_buffer[0..]);
     while (index < line_length) : (index = next_index) {
         start_indices.appendAssumeCapacity(@truncate(index));
@@ -195,11 +197,7 @@ pub fn part2(input: []const u8) u64 {
     }
 
     for (0..line_count - 1) |i| {
-        for (numbers_mult[i].items) |*item| {
-            if (item.* == 0) {
-                item.* = 1;
-            }
-        }
+        std.mem.replaceScalar(BufferType, numbers_mult[i].items, 0, 1);
     }
 
     // @PERF Find optimal vector length
