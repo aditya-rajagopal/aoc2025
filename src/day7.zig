@@ -48,6 +48,8 @@ pub fn part1(input: []const u8) u64 {
 
     var result: u64 = 0;
     var i: usize = 2;
+    // NOTE: We dont need to loop through the entire row. The first instance of a `^` will always be at a predictable position
+    // and the last instance will always be at a predictable position for a given row.
     var start_displacement: usize = 0;
     while (i < height - 1) : (i += 2) {
         const line = input[i * (width + 1) ..][0..width];
@@ -101,6 +103,8 @@ pub fn part2(input: []const u8) u64 {
     }
 
     var i: usize = 2;
+    // NOTE: We dont need to loop through the entire row. The first instance of a `^` will always be at a predictable position
+    // and the last instance will always be at a predictable position for a given row.
     var start_displacement: usize = 0;
     while (i < height - 1) : (i += 2) {
         const line = input[i * (width + 1) ..][0..width];
