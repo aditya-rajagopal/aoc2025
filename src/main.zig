@@ -15,7 +15,7 @@ const day5_data: []const u8 = @embedFile("data/day5.txt");
 const day6_data: []const u8 = @embedFile("data/day6.txt");
 const day7_data: []const u8 = @embedFile("data/day7.txt");
 
-const iterations: u64 = 1;
+const iterations: u64 = 10000;
 
 pub fn main() !void {
     var timer = std.time.Timer.start() catch unreachable;
@@ -73,17 +73,14 @@ pub fn main() !void {
     end = timer.lap();
     std.log.info("Day 6 Part 2\n\tTotal: {d} \n\tTime: {d}ms", .{ result_day6_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) / iterations });
     timer.reset();
-    var result_day7_1: u64 = 0;
+    var result_day7_1: u64, var result_day7_2: u64 = .{ 0, 0 };
     for (0..iterations) |_| {
-        result_day7_1 = day7.part1(day7_data);
+        result_day7_1, result_day7_2 = day7.part1and2(day7_data);
     }
     end = timer.lap();
-    std.log.info("Day 7 Part 1\n\tTotal: {d} \n\tTime: {d}ms", .{ result_day7_1, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) / iterations });
-    timer.reset();
-    var result_day7_2: u64 = 0;
-    for (0..iterations) |_| {
-        result_day7_2 = day7.part2(day7_data);
-    }
-    end = timer.lap();
-    std.log.info("Day 7 Part 2\n\tTotal: {d} \n\tTime: {d}ms", .{ result_day7_2, @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) / iterations });
+    std.log.info("Day 7 Part 1\n\tTotal: {d} \n      Part 2\n\tTotal: {d} \n\tTime: {d}ms", .{
+        result_day7_1,
+        result_day7_2,
+        @as(f32, @floatFromInt(end)) / @as(f32, std.time.ns_per_ms) / iterations,
+    });
 }
