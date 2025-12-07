@@ -34,17 +34,18 @@ pub fn part1(input: []const u8) u64 {
     assert(width < buffer.len);
 
     @memset(buffer[0..width], false);
-
     var beams = buffer[0..width];
-
     beams[beam_start] = true;
 
-    // NOTE: Observing the inputs it seems that splitters only exist on alternating rows.
-    // Should this not be the case the algorithm will need to be modified. This also means
-    // the number of rws should be even.
-    // Also assuming that the two splitters are not next to each other and we can always split into two.
-    const splitters_alternating: bool = true;
-    assert(splitters_alternating and height & 1 == 0);
+    {
+        // NOTE: Observing the inputs it seems that splitters only exist on alternating rows.
+        // Should this not be the case the algorithm will need to be modified. This also means
+        // the number of rws should be even.
+        // Also assuming that the two splitters are not next to each other and we can always split into two.
+        const splitters_alternating: bool = true;
+        assert(splitters_alternating and height & 1 == 0);
+    }
+
     var result: u64 = 0;
     var i: usize = 2;
     while (i < height - 1) : (i += 2) {
@@ -52,6 +53,8 @@ pub fn part1(input: []const u8) u64 {
         var position: usize = 0;
         while (position < width) : (position += 1) {
             if (!(line[position] == '^' and beams[position])) continue;
+            // NOTE: Assuming there are no splitters at the edges
+            // NOTE: Because a `^` is always followed by a `.` modifying position + 1 is safe as it will be skipped
             result += 1;
             beams[position - 1] = true;
             beams[position + 1] = true;
@@ -78,20 +81,23 @@ pub fn part2(input: []const u8) u64 {
     assert(width >= 3);
 
     const beam_start: usize = std.mem.findScalar(u8, input, 'S') orelse unreachable;
+
     var buffer: [256]usize = undefined;
     assert(width < buffer.len);
 
     @memset(buffer[0..width], 0);
-
     var beams = buffer[0..width];
     beams[beam_start] = 1;
 
-    // NOTE: Observing the inputs it seems that splitters only exist on alternating rows.
-    // Should this not be the case the algorithm will need to be modified. This also means
-    // the number of rws should be even.
-    // Also assuming that the two splitters are not next to each other and we can always split into two.
-    const splitters_alternating: bool = true;
-    assert(splitters_alternating and height & 1 == 0);
+    {
+        // NOTE: Observing the inputs it seems that splitters only exist on alternating rows.
+        // Should this not be the case the algorithm will need to be modified. This also means
+        // the number of rws should be even.
+        // Also assuming that the two splitters are not next to each other and we can always split into two.
+        const splitters_alternating: bool = true;
+        assert(splitters_alternating and height & 1 == 0);
+    }
+
     var i: usize = 2;
     while (i < height - 1) : (i += 2) {
         const line = input[i * (width + 1) ..][0..width];
@@ -99,6 +105,7 @@ pub fn part2(input: []const u8) u64 {
         while (position < width) : (position += 1) {
             if (!(line[position] == '^' and beams[position] > 0)) continue;
             // NOTE: Assuming there are no splitters at the edges
+            // NOTE: Because a `^` is always followed by a `.` modifying position + 1 is safe as it will be skipped
             const split_1 = position - 1;
             const split_2 = position + 1;
             beams[split_1] += beams[position];
