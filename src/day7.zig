@@ -31,20 +31,17 @@ pub fn part1(input: []const u8) u64 {
     const grid: []u8 = if (builtin.mode == .Debug) std.heap.page_allocator.dupe(u8, input) catch unreachable else undefined;
 
     const beam_start: usize = std.mem.findScalar(u8, input, 'S') orelse unreachable;
-    var buffer: [512 * 1024]u8 = undefined;
-    var buffer1 = std.heap.FixedBufferAllocator.init(buffer[0 .. 128 * 1024]);
-    var buffer2 = std.heap.FixedBufferAllocator.init(buffer[128 * 1024 ..]);
 
-    const HashSet = std.AutoArrayHashMap(u8, void);
+    var buffer: [1024]bool = undefined;
+    assert(width * 2 < buffer.len);
 
-    var beams = [_]HashSet{ HashSet.init(buffer1.allocator()), HashSet.init(buffer2.allocator()) };
+    @memset(buffer[0 .. 2 * width], false);
 
+    var beams = [_][]bool{ buffer[0..width], buffer[width .. 2 * width] };
     var current: usize = 0;
     var next: usize = 1;
-    beams[current].ensureUnusedCapacity(1024) catch unreachable;
-    beams[next].ensureUnusedCapacity(1024) catch unreachable;
 
-    beams[current].putAssumeCapacity(@truncate(beam_start), {});
+    beams[current][beam_start] = true;
 
     // NOTE: Observing the inputs it seems that splitters only exist on alternating rows.
     // Should this not be the case the algorithm will need to be modified. This also means
@@ -57,30 +54,36 @@ pub fn part1(input: []const u8) u64 {
     while (i < height - 1) : (i += 2) {
         if (builtin.mode == .Debug) {
             const grid_line = grid[(i - 1) * (width + 1) ..][0..width];
-            for (beams[current].keys()) |key| {
-                grid_line[key] = '|';
+            for (beams[current], 0..) |beam, index| {
+                if (beam) {
+                    grid_line[index] = '|';
+                }
             }
         }
 
         const line = input[i * (width + 1) ..][0..width];
-        for (beams[current].keys()) |beam| {
-            if (line[beam] == '^') {
-                result += 1;
-                // NOTE: Assuming there are no splitters at the edges
-                const split_1 = beam - 1;
-                const split_2 = beam + 1;
-                beams[next].putAssumeCapacity(split_1, {});
-                beams[next].putAssumeCapacity(split_2, {});
-            } else {
-                beams[next].putAssumeCapacity(beam, {});
+        for (beams[current], 0..) |beam, position| {
+            if (beam) {
+                if (line[position] == '^') {
+                    result += 1;
+                    // NOTE: Assuming there are no splitters at the edges
+                    const split_1 = position - 1;
+                    const split_2 = position + 1;
+                    beams[next][split_1] = true;
+                    beams[next][split_2] = true;
+                } else {
+                    beams[next][position] = true;
+                }
             }
         }
-        beams[current].clearRetainingCapacity();
+        @memset(beams[current], false);
 
         if (builtin.mode == .Debug) {
             const grid_line = grid[i * (width + 1) ..][0..width];
-            for (beams[next].keys()) |key| {
-                grid_line[key] = '|';
+            for (beams[next], 0..) |beam, index| {
+                if (beam) {
+                    grid_line[index] = '|';
+                }
             }
         }
         current ^= 1;
@@ -105,20 +108,16 @@ pub fn part2(input: []const u8) u64 {
     assert(width >= 3);
 
     const beam_start: usize = std.mem.findScalar(u8, input, 'S') orelse unreachable;
-    var buffer: [512 * 1024]u8 = undefined;
-    var buffer1 = std.heap.FixedBufferAllocator.init(buffer[0 .. 128 * 1024]);
-    var buffer2 = std.heap.FixedBufferAllocator.init(buffer[128 * 1024 ..]);
+    var buffer: [1024]usize = undefined;
+    assert(width * 2 < buffer.len);
 
-    const Map = std.AutoArrayHashMap(u8, usize);
+    @memset(buffer[0 .. 2 * width], 0);
 
-    var beams = [_]Map{ Map.init(buffer1.allocator()), Map.init(buffer2.allocator()) };
-
+    var beams = [_][]usize{ buffer[0..width], buffer[width .. 2 * width] };
     var current: usize = 0;
     var next: usize = 1;
-    beams[current].ensureUnusedCapacity(1024) catch unreachable;
-    beams[next].ensureUnusedCapacity(1024) catch unreachable;
 
-    beams[current].putAssumeCapacity(@truncate(beam_start), 1);
+    beams[current][beam_start] = 1;
 
     // NOTE: Observing the inputs it seems that splitters only exist on alternating rows.
     // Should this not be the case the algorithm will need to be modified. This also means
@@ -129,41 +128,26 @@ pub fn part2(input: []const u8) u64 {
     var i: usize = 2;
     while (i < height - 1) : (i += 2) {
         const line = input[i * (width + 1) ..][0..width];
-        var iterator = beams[current].iterator();
-        while (iterator.next()) |superposition| {
-            if (line[superposition.key_ptr.*] == '^') {
+        for (beams[current], 0..) |superpositions, position| {
+            if (superpositions == 0) continue;
+            if (line[position] == '^') {
                 // NOTE: Assuming there are no splitters at the edges
-                const split_1 = superposition.key_ptr.* - 1;
-                const split_2 = superposition.key_ptr.* + 1;
-                var result = beams[next].getOrPutAssumeCapacity(split_1);
-                if (result.found_existing) {
-                    result.value_ptr.* += superposition.value_ptr.*;
-                } else {
-                    result.value_ptr.* = superposition.value_ptr.*;
-                }
-                result = beams[next].getOrPutAssumeCapacity(split_2);
-                if (result.found_existing) {
-                    result.value_ptr.* += superposition.value_ptr.*;
-                } else {
-                    result.value_ptr.* = superposition.value_ptr.*;
-                }
+                const split_1 = position - 1;
+                const split_2 = position + 1;
+                beams[next][split_1] += superpositions;
+                beams[next][split_2] += superpositions;
             } else {
-                const result = beams[next].getOrPutAssumeCapacity(superposition.key_ptr.*);
-                if (result.found_existing) {
-                    result.value_ptr.* += superposition.value_ptr.*;
-                } else {
-                    result.value_ptr.* = superposition.value_ptr.*;
-                }
+                beams[next][position] += superpositions;
             }
         }
-        beams[current].clearRetainingCapacity();
+        @memset(beams[current], 0);
 
         current ^= 1;
         next ^= 1;
     }
     var result: u64 = 0;
-    for (beams[current].values()) |value| {
-        result += value;
+    for (beams[current]) |superpositions| {
+        result += superpositions;
     }
 
     return result;
