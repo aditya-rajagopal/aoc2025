@@ -30,6 +30,7 @@ pub fn part1(input: []const u8) u64 {
 
     const beam_start: usize = std.mem.findScalar(u8, input, 'S') orelse unreachable;
 
+    // NOTE: I am assuming that there can only be 256 columns at most. This can be changed if needed.
     var buffer: [256]bool = undefined;
     assert(width < buffer.len);
 
@@ -86,6 +87,7 @@ pub fn part2(input: []const u8) u64 {
 
     const beam_start: usize = std.mem.findScalar(u8, input, 'S') orelse unreachable;
 
+    // NOTE: I am assuming that there can only be 256 columns at most. This can be changed if needed.
     var buffer: [256]usize = undefined;
     assert(width < buffer.len);
 

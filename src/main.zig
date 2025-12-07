@@ -15,7 +15,7 @@ const day5_data: []const u8 = @embedFile("data/day5.txt");
 const day6_data: []const u8 = @embedFile("data/day6.txt");
 const day7_data: []const u8 = @embedFile("data/day7.txt");
 
-const iterations: u64 = 10000;
+const iterations: u64 = 1;
 
 pub fn main() !void {
     var timer = std.time.Timer.start() catch unreachable;
