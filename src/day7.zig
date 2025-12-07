@@ -48,10 +48,11 @@ pub fn part1(input: []const u8) u64 {
 
     var result: u64 = 0;
     var i: usize = 2;
+    var start_displacement: usize = 0;
     while (i < height - 1) : (i += 2) {
         const line = input[i * (width + 1) ..][0..width];
-        var position: usize = 0;
-        while (position < width) : (position += 1) {
+        var position: usize = beam_start - start_displacement;
+        while (position < beam_start + start_displacement + 1) : (position += 1) {
             if (!(line[position] == '^' and beams[position])) continue;
             // NOTE: Assuming there are no splitters at the edges
             // NOTE: Because a `^` is always followed by a `.` modifying position + 1 is safe as it will be skipped
@@ -61,6 +62,7 @@ pub fn part1(input: []const u8) u64 {
             beams[position] = false;
             position += 1;
         }
+        start_displacement += 1;
     }
 
     // if (builtin.mode == .Debug) {
@@ -85,7 +87,7 @@ pub fn part2(input: []const u8) u64 {
     var buffer: [256]usize = undefined;
     assert(width < buffer.len);
 
-    @memset(buffer[0..width], 0);
+    @memset(&buffer, 0);
     var beams = buffer[0..width];
     beams[beam_start] = 1;
 
@@ -99,10 +101,11 @@ pub fn part2(input: []const u8) u64 {
     }
 
     var i: usize = 2;
+    var start_displacement: usize = 0;
     while (i < height - 1) : (i += 2) {
         const line = input[i * (width + 1) ..][0..width];
-        var position: usize = 0;
-        while (position < width) : (position += 1) {
+        var position: usize = beam_start - start_displacement;
+        while (position < beam_start + start_displacement + 1) : (position += 1) {
             if (!(line[position] == '^' and beams[position] > 0)) continue;
             // NOTE: Assuming there are no splitters at the edges
             // NOTE: Because a `^` is always followed by a `.` modifying position + 1 is safe as it will be skipped
@@ -112,13 +115,11 @@ pub fn part2(input: []const u8) u64 {
             beams[split_2] += beams[position];
             beams[position] = 0;
         }
+        start_displacement += 1;
     }
-    var result: u64 = 0;
-    for (beams) |superpositions| {
-        result += superpositions;
-    }
+    const result: @Vector(256, usize) = buffer;
 
-    return result;
+    return @reduce(.Add, result);
 }
 
 test "part2" {
